@@ -12,3 +12,4 @@ CTestTestfile.cmake
 .idea
 *.iml
 cmake-build-debug
+*.cbp
