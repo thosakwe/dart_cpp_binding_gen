@@ -111,7 +111,7 @@ class DelegateBuilder implements Builder {
       if (constructor.documentationComment == null)
         sig
           ..comments
-              .add('Creates a new instance of `${rc.pascalCase}$suffix.`');
+              .add('Creates a new instance of `${rc.pascalCase}$suffix`.');
       else
         sig.comments
             .addAll(constructor.documentationComment.split('\n').map(stripDoc));
