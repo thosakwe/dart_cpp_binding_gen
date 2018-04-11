@@ -12,5 +12,7 @@ DART_EXPORT Dart_Handle delegate_test_Init(Dart_Handle parent_library);
  
 void dart_cpp_binding_generator_extension_get_baz_from(Dart_NativeArguments arguments);
  
+void dart_cpp_binding_generator_extension_set_baz_to(Dart_NativeArguments arguments);
+ 
 #endif
  
