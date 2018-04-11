@@ -70,7 +70,7 @@ class ExtensionBuilder implements Builder {
     headerFile.body.addAll([
       new c.Code('#ifndef ${ifDefRc.constantCase}'),
       new c.Code('#define ${ifDefRc.constantCase}'),
-      new c.Include.system('string.h'),
+      new c.Include.system('string'),
       new c.Include.system('dart_api.h'),
     ]);
 
