@@ -6,9 +6,12 @@ builders:
     import: "package:dart_cpp_binding_generator/dart_cpp_binding_generator.dart"
     builder_factories:
       - delegateBuilder
+      - extensionBuilder
     auto_apply: root_package
     build_to: source
     build_extensions:
       .dart:
+        - .h
+        - .cc
         - .delegate.h
         - .delegate.cpp

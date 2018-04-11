@@ -28,9 +28,9 @@ Dart_Handle dart_cpp_binding_generator_foo_invoke_quux(Dart_Handle instance) {
   return Dart_Invoke(instance, Dart_NewStringFromCString("quux"), 0, arguments);
 }
  
-Dart_Handle dart_cpp_binding_generator_foo_invoke_add_to_quux(Dart_Handle instance, Dart_Handle x) {
+Dart_Handle dart_cpp_binding_generator_foo_invoke_add_to_bar(Dart_Handle instance, Dart_Handle x) {
   Dart_Handle arguments[1];
   arguments[0] = x;
-  return Dart_Invoke(instance, Dart_NewStringFromCString("addToQuux"), 1, arguments);
+  return Dart_Invoke(instance, Dart_NewStringFromCString("addToBar"), 1, arguments);
 }
  

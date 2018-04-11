@@ -14,11 +14,11 @@ Builder delegateBuilder(_) => const DelegateBuilder();
 
 const TypeChecker delegateTypeChecker = const TypeChecker.fromRuntime(Binding);
 
-final c.CType _darthandle = new c.CType('Dart_Handle');
+final c.CType dartHandleType = new c.CType('Dart_Handle');
 
 final RegExp _doc = new RegExp(r'^///\s*');
 
-String _stripDoc(String s) => s.replaceAll(_doc, '');
+String stripDoc(String s) => s.replaceAll(_doc, '');
 
 class DelegateBuilder implements Builder {
   const DelegateBuilder();
@@ -101,7 +101,7 @@ class DelegateBuilder implements Builder {
         suffix = '.${constructor.name}';
       }
 
-      var sig = new c.FunctionSignature(_darthandle, name);
+      var sig = new c.FunctionSignature(dartHandleType, name);
 
       if (constructor.documentationComment == null)
         sig
@@ -109,7 +109,7 @@ class DelegateBuilder implements Builder {
               .add('Creates a new instance of `${rc.pascalCase}$suffix.`');
       else
         sig.comments.addAll(
-            constructor.documentationComment.split('\n').map(_stripDoc));
+            constructor.documentationComment.split('\n').map(stripDoc));
 
       var f = new c.CFunction(sig);
       headerFile.body.add(sig);
@@ -141,10 +141,10 @@ class DelegateBuilder implements Builder {
       var name = new ReCase(param.name).camelCase;
       var suffix = param.documentationComment == null
           ? null
-          : param.documentationComment.split('\n').map(_stripDoc).join(' ');
+          : param.documentationComment.split('\n').map(stripDoc).join(' ');
       suffix ??= (param.hasRequired || param.isNotOptional) ? 'Required.' : '';
       sig.comments.add('@param $name $suffix');
-      sig.parameters.add(new c.Parameter(_darthandle, name));
+      sig.parameters.add(new c.Parameter(dartHandleType, name));
       f.body.add(new c.Code('arguments[${i++}] = $name;'));
     }
   }
@@ -168,13 +168,13 @@ class DelegateBuilder implements Builder {
           .displayName}';
       name = new ReCase(name).snakeCase;
       var sig = new c.FunctionSignature(
-          p.isGetter ? _darthandle : c.CType.void$, name);
+          p.isGetter ? dartHandleType : c.CType.void$, name);
       var f = new c.CFunction(sig);
       headerFile.body.add(sig);
       implementationFile.body.add(f);
-      sig.parameters.add(new c.Parameter(_darthandle, 'instance'));
+      sig.parameters.add(new c.Parameter(dartHandleType, 'instance'));
 
-      if (p.isSetter) sig.parameters.add(new c.Parameter(_darthandle, 'value'));
+      if (p.isSetter) sig.parameters.add(new c.Parameter(dartHandleType, 'value'));
 
       sig.comments.add(
           '${upper}s the `${p.displayName}` property of an instance of `${rc
@@ -203,11 +203,11 @@ class DelegateBuilder implements Builder {
     for (var method in clazz.methods) {
       var name = '${packageRc.snakeCase}_${rc.snakeCase}_invoke_${method.name}';
       var sig =
-          new c.FunctionSignature(_darthandle, new ReCase(name).snakeCase);
+          new c.FunctionSignature(dartHandleType, new ReCase(name).snakeCase);
       var f = new c.CFunction(sig);
       headerFile.body.add(sig);
       implementationFile.body.add(f);
-      sig.parameters.add(new c.Parameter(_darthandle, 'instance'));
+      sig.parameters.add(new c.Parameter(dartHandleType, 'instance'));
 
       if (method.documentationComment == null)
         sig
@@ -216,7 +216,7 @@ class DelegateBuilder implements Builder {
               .pascalCase}`.');
       else
         sig.comments
-            .addAll(method.documentationComment.split('\n').map(_stripDoc));
+            .addAll(method.documentationComment.split('\n').map(stripDoc));
 
       f.body.add(new c.Code(
           'Dart_Handle arguments[${method.parameters.length}];'));

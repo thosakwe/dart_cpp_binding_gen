@@ -30,11 +30,11 @@ void dart_cpp_binding_generator_foo_set_baz(Dart_Handle instance, Dart_Handle va
 Dart_Handle dart_cpp_binding_generator_foo_invoke_quux(Dart_Handle instance);
  
 /*
- * Invokes the `addToQuux` method of an instance of `Foo`.
+ * Add [x] to `baz`.
  * @param x Required.
  * @return The result of calling the function.
  */
-Dart_Handle dart_cpp_binding_generator_foo_invoke_add_to_quux(Dart_Handle instance, Dart_Handle x);
+Dart_Handle dart_cpp_binding_generator_foo_invoke_add_to_bar(Dart_Handle instance, Dart_Handle x);
  
 #endif
  
