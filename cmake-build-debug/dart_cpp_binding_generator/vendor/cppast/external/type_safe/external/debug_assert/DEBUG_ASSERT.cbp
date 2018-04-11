@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="DEBUG_ASSERT"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\dart_cpp_binding_generator\;CMake Files\dart_cpp_binding_generator\vendor\;CMake Files\dart_cpp_binding_generator\vendor\cppast\;CMake Files\dart_cpp_binding_generator\vendor\cppast\external\;CMake Files\dart_cpp_binding_generator\vendor\cppast\external\type_safe\;CMake Files\dart_cpp_binding_generator\vendor\cppast\external\type_safe\external\;CMake Files\dart_cpp_binding_generator\vendor\cppast\external\type_safe\external\debug_assert\;CMake Files\dart_cpp_binding_generator\vendor\cppast\src\;CMake Files\dart_cpp_binding_generator\src\;CMake Files\dart_cpp_binding_generator\test\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/cmake-build-debug/dart_cpp_binding_generator/vendor/cppast/external/type_safe/external/debug_assert"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/cmake-build-debug/dart_cpp_binding_generator/vendor/cppast/external/type_safe/external/debug_assert/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/cmake-build-debug/dart_cpp_binding_generator/vendor/cppast/external/type_safe/external/debug_assert/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/cmake-build-debug/dart_cpp_binding_generator/vendor/cppast/external/type_safe/external/debug_assert/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/cmake-build-debug/dart_cpp_binding_generator/vendor/cppast/external/type_safe/external/debug_assert/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/vendor/cppast/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\vendor\cppast\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/vendor/cppast/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\vendor\cppast\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/vendor/cppast/external/external.cmake">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\vendor\cppast\external\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/vendor/cppast/external/external.cmake">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\vendor\cppast\external\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/vendor/cppast/external/type_safe/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\vendor\cppast\external\type_safe\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/vendor/cppast/external/type_safe/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\vendor\cppast\external\type_safe\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/vendor/cppast/external/type_safe/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\vendor\cppast\external\type_safe\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/vendor/cppast/external/type_safe/external/external.cmake">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\vendor\cppast\external\type_safe\external\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/vendor/cppast/external/type_safe/external/external.cmake">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\vendor\cppast\external\type_safe\external\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/vendor/cppast/external/type_safe/external/external.cmake">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\vendor\cppast\external\type_safe\external\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/vendor/cppast/external/type_safe/external/debug_assert/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\vendor\cppast\external\type_safe\external\debug_assert\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/vendor/cppast/external/type_safe/external/debug_assert/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\vendor\cppast\external\type_safe\external\debug_assert\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/vendor/cppast/external/type_safe/external/debug_assert/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\vendor\cppast\external\type_safe\external\debug_assert\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/vendor/cppast/external/type_safe/external/debug_assert/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\vendor\cppast\external\type_safe\external\debug_assert\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/vendor/cppast/src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\vendor\cppast\src\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/vendor/cppast/src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\vendor\cppast\src\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\src\"/>
+		</Unit>
+		<Unit filename="/Users/thosakwe/Source/Dart/dart_cpp_binding_gen/dart_cpp_binding_generator/test/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\dart_cpp_binding_generator\test\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,0 +1,14 @@
+targets:
+  $default: {}
+builders:
+  cpp_binding:
+    target: "dart_cpp_binding_generator"
+    import: "package:dart_cpp_binding_generator/dart_cpp_binding_generator.dart"
+    builder_factories:
+      - delegateBuilder
+    auto_apply: root_package
+    build_to: source
+    build_extensions:
+      .dart:
+        - .delegate.h
+        - .delegate.cpp

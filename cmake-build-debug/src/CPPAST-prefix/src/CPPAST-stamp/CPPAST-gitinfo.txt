@@ -1,0 +1,3 @@
+repository='https://github.com/foonathan/cppast.git'
+module=''
+tag=''
