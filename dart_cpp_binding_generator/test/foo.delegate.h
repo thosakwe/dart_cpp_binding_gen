@@ -12,10 +12,10 @@ Dart_Handle dart_cpp_binding_generator_new_foo();
  
 /*
  * Named constructor!!!
- * @param abc Required.
+ * @param baz Required.
  * @return A handle to the created instance.
  */
-Dart_Handle dart_cpp_binding_generator_new_foo_bar(Dart_Handle abc);
+Dart_Handle dart_cpp_binding_generator_new_foo_bar(Dart_Handle baz);
  
 // Gets the `baz` property of an instance of `Foo`.
 Dart_Handle dart_cpp_binding_generator_foo_get_baz(Dart_Handle instance);

@@ -5,7 +5,7 @@ class Foo {
   Foo();
 
   /// Named constructor!!!
-  Foo.bar(int abc);
+  Foo.bar(this.baz);
 
   int baz;
 

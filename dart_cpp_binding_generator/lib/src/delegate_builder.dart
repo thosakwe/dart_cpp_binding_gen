@@ -83,14 +83,19 @@ class DelegateBuilder implements Builder {
       var packageRc = new ReCase(buildStep.inputId.package);
       var rc = new ReCase(clazz.name);
       generateConstructors(
-          rc, packageRc, clazz, headerFile, implementationFile);
+          buildStep, rc, packageRc, clazz, headerFile, implementationFile);
       generateFields(rc, packageRc, clazz, headerFile, implementationFile);
       generateMethods(rc, packageRc, clazz, headerFile, implementationFile);
     }
   }
 
-  generateConstructors(ReCase rc, ReCase packageRc, ClassElement clazz,
-      c.CompilationUnit headerFile, c.CompilationUnit implementationFile) {
+  generateConstructors(
+      BuildStep buildStep,
+      ReCase rc,
+      ReCase packageRc,
+      ClassElement clazz,
+      c.CompilationUnit headerFile,
+      c.CompilationUnit implementationFile) {
     for (var constructor in clazz.constructors) {
       var name = '${packageRc.snakeCase}_new_${rc.snakeCase}';
       var suffix = '';
@@ -108,15 +113,19 @@ class DelegateBuilder implements Builder {
           ..comments
               .add('Creates a new instance of `${rc.pascalCase}$suffix.`');
       else
-        sig.comments.addAll(
-            constructor.documentationComment.split('\n').map(stripDoc));
+        sig.comments
+            .addAll(constructor.documentationComment.split('\n').map(stripDoc));
 
       var f = new c.CFunction(sig);
       headerFile.body.add(sig);
       implementationFile.body.add(f);
 
+      var libPath = p.join(
+          'package:${buildStep.inputId.package}', buildStep.inputId.path);
+
       f.body.addAll([
-        new c.Code('Dart_Handle lib = Dart_RootLibrary();'),
+        new c.Code(
+            'Dart_Handle lib = Dart_LookupLibrary(Dart_NewStringFromCString("$libPath"));'),
         new c.Code(
             'Dart_Handle clazz = Dart_GetClass(lib, Dart_NewStringFromCString("${clazz
                 .name}"));'),
@@ -174,7 +183,8 @@ class DelegateBuilder implements Builder {
       implementationFile.body.add(f);
       sig.parameters.add(new c.Parameter(dartHandleType, 'instance'));
 
-      if (p.isSetter) sig.parameters.add(new c.Parameter(dartHandleType, 'value'));
+      if (p.isSetter)
+        sig.parameters.add(new c.Parameter(dartHandleType, 'value'));
 
       sig.comments.add(
           '${upper}s the `${p.displayName}` property of an instance of `${rc
@@ -218,8 +228,8 @@ class DelegateBuilder implements Builder {
         sig.comments
             .addAll(method.documentationComment.split('\n').map(stripDoc));
 
-      f.body.add(new c.Code(
-          'Dart_Handle arguments[${method.parameters.length}];'));
+      f.body.add(
+          new c.Code('Dart_Handle arguments[${method.parameters.length}];'));
 
       applyParams(sig, f, method.parameters);
 

@@ -7,6 +7,11 @@ import 'package:test/test.dart';
 import 'foo.dart';
 
 main() {
+  test('constructor', () {
+    var foo = newFooWithX(2717);
+    expect(foo.baz, 2717);
+  });
+
   test('getter method', () {
     var foo = new Foo()..baz = 24;
     expect(getBazFrom(foo), foo.baz);
@@ -23,6 +28,8 @@ main() {
     expect(addToBaz(foo, 12), foo.addToBar(12));
   });
 }
+
+Foo newFooWithX(int x) native "newFooWithX";
 
 int getBazFrom(Foo foo) native "getBazFrom";
 

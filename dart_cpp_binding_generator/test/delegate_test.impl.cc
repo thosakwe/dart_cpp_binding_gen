@@ -24,3 +24,14 @@ void dart_cpp_binding_generator_extension_add_to_baz(Dart_NativeArguments argume
     Dart_Handle result = dart_cpp_binding_generator_foo_invoke_add_to_bar(foo, value);
     Dart_SetReturnValue(arguments, result);
 }
+
+void dart_cpp_binding_generator_extension_new_foo_with_x(Dart_NativeArguments arguments) {
+    // First arg is int
+    Dart_Handle value = Dart_GetNativeArgument(arguments, 0);
+
+    // Create an instance of `Foo.bar`
+    Dart_Handle foo = dart_cpp_binding_generator_new_foo_bar(value);
+
+    // Return it
+    Dart_SetReturnValue(arguments, foo);
+}
