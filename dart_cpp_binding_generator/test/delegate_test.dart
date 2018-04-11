@@ -8,8 +8,7 @@ import 'foo.dart';
 
 main() {
   test('getter method', () {
-    var foo = new Foo()
-      ..baz = 24;
+    var foo = new Foo()..baz = 24;
     expect(getBazFrom(foo), foo.baz);
   });
 
@@ -18,7 +17,15 @@ main() {
     setBazTo(foo, 46);
     expect(foo.baz, 46);
   });
+
+  test('invoke method', () {
+    var foo = new Foo()..baz = 34;
+    expect(addToBaz(foo, 12), foo.addToBar(12));
+  });
 }
 
 int getBazFrom(Foo foo) native "getBazFrom";
+
 void setBazTo(Foo foo, int value) native "setBazTo";
+
+int addToBaz(Foo foo, int value) native "addToBaz";

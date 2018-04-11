@@ -8,6 +8,7 @@ Dart_NativeFunction ResolveName(Dart_Handle name, int argc, bool* auto_setup_sco
   if (Dart_IsError(stringHandle)) Dart_PropagateError(stringHandle);
   if (strcmp("getBazFrom", cname) == 0) result = dart_cpp_binding_generator_extension_get_baz_from;
   if (strcmp("setBazTo", cname) == 0) result = dart_cpp_binding_generator_extension_set_baz_to;
+  if (strcmp("addToBaz", cname) == 0) result = dart_cpp_binding_generator_extension_add_to_baz;
   return result;
 }
  
