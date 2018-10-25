@@ -10,15 +10,15 @@ namespace dart_cpp_binding_generator {
   class Foo;
   class Foo {
     public:
-      Foo(const Dart_Handle handle);
+      Foo(Dart_Handle handle);
       Dart_Handle getHandle() const;
       Foo();
       static Foo bar(int64_t baz);
       int64_t getBaz() const;
-      void setBaz(const int64_t value);
+      void setBaz(int64_t value);
     private:
       static Dart_Handle handleError(Dart_Handle handle);
-      const Dart_Handle handle;
+      Dart_Handle handle;
   };
 }
  

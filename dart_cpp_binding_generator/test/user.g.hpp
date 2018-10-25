@@ -11,23 +11,23 @@ namespace dart_cpp_binding_generator {
   class Status;
   class User {
     public:
-      User(const Dart_Handle handle);
+      User(Dart_Handle handle);
       Dart_Handle getHandle() const;
       User(const Status& status);
-      Status& getStatus() const;
+      const Status& getStatus() const;
     private:
       static Dart_Handle handleError(Dart_Handle handle);
-      const Dart_Handle handle;
+      Dart_Handle handle;
   };
   class Status {
     public:
-      Status(const Dart_Handle handle);
+      Status(Dart_Handle handle);
       Dart_Handle getHandle() const;
       Status(const std::string& text);
       std::string getText() const;
     private:
       static Dart_Handle handleError(Dart_Handle handle);
-      const Dart_Handle handle;
+      Dart_Handle handle;
   };
 }
  

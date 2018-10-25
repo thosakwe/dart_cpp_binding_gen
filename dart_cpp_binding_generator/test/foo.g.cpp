@@ -1,11 +1,11 @@
 #include "foo.g.hpp"
  
-dart_cpp_binding_generator::Foo::handleError(Dart_Handle handle) {
+Dart_Handle dart_cpp_binding_generator::Foo::handleError(Dart_Handle handle) {
   if (Dart_IsError(handle)) Dart_PropagateError(handle);
   return handle;
 }
  
-dart_cpp_binding_generator::Foo::Foo(const Dart_Handle handle) {
+dart_cpp_binding_generator::Foo::Foo(Dart_Handle handle) {
   this->handle = handle;
 }
  
@@ -21,7 +21,7 @@ dart_cpp_binding_generator::Foo::Foo() {
   this->handle = Dart_New(clazz, Dart_NewStringFromCString(""), argLen, arguments);
 }
  
-dart_cpp_binding_generator::Foo dart_cpp_binding_generator::Foo::Foo(int64_t baz) {
+dart_cpp_binding_generator::Foo dart_cpp_binding_generator::Foo::bar(int64_t baz) {
   Dart_Handle arguments[1];
   int argLen = 1;
   Dart_Handle lib = Dart_LookupLibrary(Dart_NewStringFromCString("package:dart_cpp_binding_generator/test/foo.dart"));
@@ -33,11 +33,11 @@ dart_cpp_binding_generator::Foo dart_cpp_binding_generator::Foo::Foo(int64_t baz
 int64_t dart_cpp_binding_generator::Foo::getBaz() const {
   Dart_Handle rawHandle = Dart_GetField(handle, Dart_NewStringFromCString("baz"));
   int64_t value;
-  handleError(Dart_IntegerToInt64(rawHandle, &value))
+  handleError(Dart_IntegerToInt64(rawHandle, &value));
   return value;
 }
  
-void dart_cpp_binding_generator::Foo::setBaz(const int64_t value) {
+void dart_cpp_binding_generator::Foo::setBaz(int64_t value) {
   Dart_SetField(handle, Dart_NewStringFromCString("baz"), Dart_NewInteger(value));
 }
  

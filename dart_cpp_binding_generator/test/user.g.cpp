@@ -1,11 +1,11 @@
 #include "user.g.hpp"
  
-dart_cpp_binding_generator::User::handleError(Dart_Handle handle) {
+Dart_Handle dart_cpp_binding_generator::User::handleError(Dart_Handle handle) {
   if (Dart_IsError(handle)) Dart_PropagateError(handle);
   return handle;
 }
  
-dart_cpp_binding_generator::User::User(const Dart_Handle handle) {
+dart_cpp_binding_generator::User::User(Dart_Handle handle) {
   this->handle = handle;
 }
  
@@ -22,16 +22,16 @@ dart_cpp_binding_generator::User::User(const dart_cpp_binding_generator::Status&
   this->handle = Dart_New(clazz, Dart_NewStringFromCString(""), argLen, arguments);
 }
  
-dart_cpp_binding_generator::Status& dart_cpp_binding_generator::User::getStatus() const {
+const dart_cpp_binding_generator::Status& dart_cpp_binding_generator::User::getStatus() const {
   return Dart_GetField(handle, Dart_NewStringFromCString("status"));
 }
  
-dart_cpp_binding_generator::Status::handleError(Dart_Handle handle) {
+Dart_Handle dart_cpp_binding_generator::Status::handleError(Dart_Handle handle) {
   if (Dart_IsError(handle)) Dart_PropagateError(handle);
   return handle;
 }
  
-dart_cpp_binding_generator::Status::Status(const Dart_Handle handle) {
+dart_cpp_binding_generator::Status::Status(Dart_Handle handle) {
   this->handle = handle;
 }
  
@@ -51,7 +51,7 @@ dart_cpp_binding_generator::Status::Status(const std::string& text) {
 std::string dart_cpp_binding_generator::Status::getText() const {
   Dart_Handle rawHandle = Dart_GetField(handle, Dart_NewStringFromCString("text"));
   const char *value;
-  handleError(Dart_String_ToCString(rawHandle, &value))
+  handleError(Dart_StringToCString(rawHandle, &value));
   return value;
 }
  

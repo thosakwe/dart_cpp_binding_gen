@@ -1,22 +1,19 @@
 import 'package:dart_cpp_binding_annotation/dart_cpp_binding_annotation.dart';
 
 @binding
-class CppParser {
-  final List<CppFunction> functions = [];
+class Chat {
+  final messages = <Message>[];
+
+  int get messageCount => messages.length;
+
+  void printInfo() {
+    print('message(s): $messageCount');
+  }
 }
 
 @binding
-class CppFunction {
-  final String name;
-  final List<CppArgument> arguments = [];
+class Message {
+  final String text;
 
-  CppFunction(this.name);
-}
-
-@binding
-class CppArgument {
-  final String name;
-  final String type;
-
-  CppArgument(this.name, this.type);
+  Message({this.text});
 }

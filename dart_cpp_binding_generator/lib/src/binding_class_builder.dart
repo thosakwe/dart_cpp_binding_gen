@@ -130,10 +130,25 @@ class _Gen {
       return c.CType.double;
     else if (_isBool(t))
       return new c.CType('bool');
-    else {
+    else if (_isList(t) && t is InterfaceType && t.typeArguments.isNotEmpty) {
+      var rc = new ReCase(t.typeArguments.first.name);
+      var listName = '${rc.pascalCase}List';
+      return new c.CType(listName);
+    } else {
       if (!withNamespace) return reference(new c.CType(t.name)).const$();
       return reference(namespacedType(namespace, new c.CType(t.name))).const$();
     }
+  }
+
+  c.Expression _defaultValue(DartType t) {
+    if (_isString(t))
+      return new c.Expression('""');
+    else if (_isInt(t))
+      return new c.Expression('0');
+    else if (_isDouble(t))
+      return new c.Expression('0.0');
+    else if (_isBool(t)) return new c.Expression('false');
+    return new c.Expression('nullptr');
   }
 
   void walk() {
@@ -147,7 +162,8 @@ class _Gen {
     // static  Dart_HandleHandleError(Dart_Handle handle);
     _private.body
         .add(new c.Code('static Dart_Handle handleError(Dart_Handle handle);'));
-    impl.body.add(new Method(namespace.name, _ctype, 'handleError')
+    impl.body.add(new Method(namespace.name, _ctype, 'handleError',
+        returnType: _dartHandle)
       ..parameters.add(new c.Parameter(_dartHandle, 'handle'))
       ..body.addAll([
         new c.Code('if (Dart_IsError(handle)) Dart_PropagateError(handle);'),
@@ -155,11 +171,11 @@ class _Gen {
       ]));
 
     // Foo(const Dart_Handle handle);
-    _public.body.add(new c.Code('${_clazz.name}(const Dart_Handle handle);'));
+    _public.body.add(new c.Code('${_clazz.name}(Dart_Handle handle);'));
     _genConstructor();
 
     // const Dart_Handle handle;
-    _private.body.add(new c.Field(_dartHandle.const$(), 'handle'));
+    _private.body.add(new c.Field(_dartHandle, 'handle'));
 
     // const Dart_Handle getHandle() const;
     _genGetHandle();
@@ -174,12 +190,21 @@ class _Gen {
       var requiredCount =
           constructor.parameters.where((p) => p.isNotOptional).length;
 
+      int i = 0;
+      var sigParams = headerParams.map((p) {
+        var nullptr = _defaultValue(constructor.parameters[i++].type).code;
+        var dart = constructor.parameters.firstWhere((pp) => pp.name == p.name);
+        return dart.isNotOptional
+            ? p
+            : new c.Parameter(p.type, '${p.name} = $nullptr');
+      });
+
       if (constructor.isDefaultConstructor || constructor.name.isEmpty) {
         _public.body
-            .add(new c.Code('${_clazz.name}(${headerParams.join(', ')});'));
+            .add(new c.Code('${_clazz.name}(${sigParams.join(', ')});'));
       } else {
         var sig = new c.FunctionSignature(_ctype.static(), constructor.name)
-          ..parameters.addAll(headerParams);
+          ..parameters.addAll(sigParams);
         _public.body.add(sig);
       }
 
@@ -218,8 +243,20 @@ class _Gen {
           value = new c.Expression('Dart_NewBoolean(${dart.name})');
         }
 
-        // TODO: Handle optional params
-        body.add(value.assignTo('arguments[$i]'));
+        List<c.Code> b = body;
+
+        if (dart.isOptional) {
+          var nullptr = _defaultValue(dart.type).code;
+          var cond = new c.Expression('${dart.name} != $nullptr');
+          var ifThen = new c.ControlFlow.if$(cond)
+            ..body.addAll(
+                [new c.Code('argLen++;'), value.assignTo('arguments[$i]')]);
+          var else$ = new c.ControlFlow.else$()
+            ..body.add(new c.Code('arguments[$i] = Dart_Null();'));
+          b.addAll([ifThen, else$]);
+        } else {
+          b.add(value.assignTo('arguments[$i]'));
+        }
       }
 
       var handle = new c.Expression(
@@ -232,33 +269,42 @@ class _Gen {
       }
 
       c.CType returnType;
+      String name = constructor.name;
 
       if (!constructor.isDefaultConstructor && constructor.name.isNotEmpty) {
         returnType = namespacedType(namespace, _ctype);
+      } else {
+        name = _clazz.name;
       }
 
-      impl.body.add(new Method(namespace.name, _ctype, _clazz.name,
-          returnType: returnType)
-        ..parameters.addAll(implParams)
-        ..body.addAll(body));
+      impl.body.add(
+          new Method(namespace.name, _ctype, name, returnType: returnType)
+            ..parameters.addAll(implParams)
+            ..body.addAll(body));
     }
 
     // Generate getters, setters for fields.
     for (var field in element.fields) {
       // TODO: String, int, bool, null, Lists, Maps
 
-      var outType = reference(new c.CType(field.type.name));
-      var namespaced = namespacedType(namespace, outType);
+      var outType = _convertParameterType(
+          field.type); //reference(new c.CType(field.type.name));
+      var namespaced = _convertParameterType(
+          field.type, true); //namespacedType(namespace, outType);
+      var setterType = outType, setterNamespaced = namespaced;
 
       // Special Dart types require special handling.
       if (_isString(field.type)) {
-        namespaced = outType = new c.CType('std::string');
+        setterNamespaced = namespaced = outType = new c.CType('std::string');
       } else if (_isInt(field.type)) {
-        namespaced = outType = c.CType.int64_t;
+        setterNamespaced = namespaced = outType = c.CType.int64_t;
       } else if (_isDouble(field.type)) {
-        namespaced = outType = c.CType.double;
+        setterNamespaced = namespaced = outType = c.CType.double;
       } else if (_isBool(field.type)) {
-        namespaced = outType = new c.CType('bool');
+        setterNamespaced = namespaced = outType = new c.CType('bool');
+      } else {
+        setterNamespaced = namespaced.const$();
+        setterType = outType.const$();
       }
 
       var getterName = 'get' + new ReCase(field.name).pascalCase;
@@ -283,28 +329,28 @@ class _Gen {
           m.body.addAll([
             rawHandle.assignTo('Dart_Handle rawHandle'),
             new c.Code('const char *value;'),
-            new c.Code('handleError(Dart_String_ToCString(rawHandle, &value))')
+            new c.Code('handleError(Dart_StringToCString(rawHandle, &value));')
           ]);
           retVal = new c.Expression('value');
         } else if (_isInt(field.type)) {
           m.body.addAll([
             rawHandle.assignTo('Dart_Handle rawHandle'),
             new c.Code('int64_t value;'),
-            new c.Code('handleError(Dart_IntegerToInt64(rawHandle, &value))')
+            new c.Code('handleError(Dart_IntegerToInt64(rawHandle, &value));')
           ]);
           retVal = new c.Expression('value');
         } else if (_isDouble(field.type)) {
           m.body.addAll([
             rawHandle.assignTo('Dart_Handle rawHandle'),
             new c.Code('double value;'),
-            new c.Code('handleError(Dart_DoubleValue(rawHandle, &value))')
+            new c.Code('handleError(Dart_DoubleValue(rawHandle, &value));')
           ]);
           retVal = new c.Expression('value');
         } else if (_isDouble(field.type)) {
           m.body.addAll([
             rawHandle.assignTo('Dart_Handle rawHandle'),
             new c.Code('bool value;'),
-            new c.Code('handleError(Dart_BooleanValue(rawHandle, &value))')
+            new c.Code('handleError(Dart_BooleanValue(rawHandle, &value));')
           ]);
           retVal = new c.Expression('value');
         }
@@ -318,14 +364,14 @@ class _Gen {
       if (field.setter != null) {
         // void setBar(const Bar& value);
         _public.body.add(new c.FunctionSignature(c.CType.void$, setterName)
-          ..parameters.add(new c.Parameter(outType.const$(), 'value')));
+          ..parameters.add(new c.Parameter(outType, 'value')));
 
         // void package::Foo::setBar(Bar& value) {
         //   Dart_SetField(handle, Dart_NewStringFromCString("baz"), value.getHandle());
         // }
         var m = new Method(namespace.name, _ctype, setterName,
             returnType: c.CType.void$)
-          ..parameters.add(new c.Parameter(namespaced.const$(), 'value'));
+          ..parameters.add(new c.Parameter(setterNamespaced, 'value'));
         c.Expression setVal = new c.Expression('value.getHandle()');
 
         if (_isString(field.type)) {
@@ -347,7 +393,7 @@ class _Gen {
 
   void _genConstructor() {
     impl.body.add(new Method(namespace.name, _ctype, _clazz.name)
-      ..parameters.add(new c.Parameter(_dartHandle.const$(), 'handle'))
+      ..parameters.add(new c.Parameter(_dartHandle, 'handle'))
       ..body.add(new c.Code('this->handle = handle;')));
   }
 
