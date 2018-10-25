@@ -5,7 +5,7 @@
 #include <dart_api.h>
  
 /*
- * Creates a new instance of `Foo.`
+ * Creates a new instance of `Foo`.
  * @return A handle to the created instance.
  */
 Dart_Handle dart_cpp_binding_generator_new_foo();
