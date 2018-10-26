@@ -14,6 +14,8 @@ namespace dart_cpp_binding_generator {
       Dart_Handle getHandle() const;
       Foo();
       static Foo bar(int64_t baz);
+      Dart_Handle quux();
+      int64_t addToBar(int64_t x);
       int64_t getBaz() const;
       void setBaz(int64_t value);
     private:

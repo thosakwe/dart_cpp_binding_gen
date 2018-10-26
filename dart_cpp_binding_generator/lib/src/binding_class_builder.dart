@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/src/dart/ast/ast.dart';
 import 'package:build/build.dart';
 import 'package:c_builder/c_builder.dart' as c;
 import 'package:code_buffer/code_buffer.dart';
@@ -48,16 +50,21 @@ class CppBindingClassBuilder implements Builder {
 
       var namespace =
           new Namespace(new ReCase(buildStep.inputId.package).snakeCase);
+      var forwardDeclarations = <c.Code>[];
+      var walked = <DartType>[];
 
       for (var annElement in genBindings) {
         if (annElement.element is ClassElement) {
-          namespace.body.add(new c.Code('class ${annElement.element.name};'));
+          forwardDeclarations
+              .add(_forwardDeclare((annElement.element as ClassElement).type));
         }
       }
 
       for (var annElement in genBindings) {
         if (annElement.element is ClassElement) {
-          new _Gen(buildStep, annElement.element as ClassElement, namespace,
+          var clazz = annElement.element as ClassElement;
+          walked.add(clazz.type);
+          new _Gen(buildStep, forwardDeclarations, walked, clazz, namespace,
                   impl)
               .walk();
         } else {
@@ -66,6 +73,7 @@ class CppBindingClassBuilder implements Builder {
         }
       }
 
+      namespace.body.insertAll(0, forwardDeclarations);
       header.body.addAll([namespace, new c.Code('#endif')]);
 
       var headerBuf = new CodeBuffer(), implBuf = new CodeBuffer();
@@ -83,11 +91,22 @@ class CppBindingClassBuilder implements Builder {
 
 final _dartHandle = new c.CType('Dart_Handle');
 
+c.Code _forwardDeclare(DartType t) {
+  var out = new c.Code('class ${t.name};');
+
+  if (t is InterfaceType && t.typeParameters.isNotEmpty) {
+    var template = t.typeParameters.map((p) => 'typename ${p.name}').join(', ');
+    out = new c.Code('template <$template> ${out.code}');
+  }
+
+  return out;
+}
+
 bool _isList(DartType t) =>
     const TypeChecker.fromRuntime(List).isAssignableFromType(t);
 
-bool _isMap(DartType t) =>
-    const TypeChecker.fromRuntime(Map).isAssignableFromType(t);
+//bool _isMap(DartType t) =>
+//    const TypeChecker.fromRuntime(Map).isAssignableFromType(t);
 
 bool _isString(DartType t) =>
     const TypeChecker.fromRuntime(String).isAssignableFromType(t);
@@ -101,24 +120,33 @@ bool _isDouble(DartType t) =>
 bool _isBool(DartType t) =>
     const TypeChecker.fromRuntime(bool).isAssignableFromType(t);
 
-bool _isNum(DartType t) => const TypeChecker.fromRuntime(num).isExactlyType(t);
-
 class _Gen {
   final BuildStep buildStep;
+  final List<c.Code> forwardDeclarations;
+  final List<DartType> walked;
   final ClassElement element;
   final Namespace namespace;
   final c.CompilationUnit impl;
   Class _clazz;
   MemberSection _public, _private;
+  Iterable<TemplateArgument> _tmplArgs;
 
-  _Gen(this.buildStep, this.element, this.namespace, this.impl);
+  _Gen(this.buildStep, this.forwardDeclarations, this.walked, this.element,
+      this.namespace, this.impl);
 
   c.CType get _ctype => new c.CType(_clazz.name);
 
   c.Parameter _convertParameter(ParameterElement p,
       [bool withNamespace = false]) {
-    return new c.Parameter(
-        _convertParameterType(p.type, withNamespace), p.name);
+    c.CType type;
+
+    try {
+      type = _convertParameterType(p.type, withNamespace);
+    } catch (_) {
+      type = _dartHandle;
+    }
+
+    return new c.Parameter(type, p.name);
   }
 
   c.CType _convertParameterType(DartType t, [bool withNamespace = false]) {
@@ -130,13 +158,45 @@ class _Gen {
       return c.CType.double;
     else if (_isBool(t))
       return new c.CType('bool');
-    else if (_isList(t) && t is InterfaceType && t.typeArguments.isNotEmpty) {
-      var rc = new ReCase(t.typeArguments.first.name);
-      var listName = '${rc.pascalCase}List';
-      return new c.CType(listName);
+    else if (t is TypeParameterType) {
+      return new c.CType(t.name);
+    } else if (t.name == 'void') {
+      return c.CType.void$;
     } else {
-      if (!withNamespace) return reference(new c.CType(t.name)).const$();
-      return reference(namespacedType(namespace, new c.CType(t.name))).const$();
+      // Bind the type, if it hasn't been bound yet.
+      var tc = new TypeChecker.fromStatic(t);
+      if (t.element is ClassElement && !walked.any(tc.isExactlyType)) {
+        var decl = _forwardDeclare(t);
+
+        // Additional guard to prevent dupe classes...
+        if (!forwardDeclarations.any((c) => c.code == decl.code)) {
+          forwardDeclarations.add(decl);
+          walked.add(t);
+          new _Gen(buildStep, forwardDeclarations, walked,
+                  t.element as ClassElement, namespace, impl)
+              .walk();
+        }
+      }
+
+      if (t is InterfaceType && t.typeArguments.isNotEmpty) {
+        var targs = t.typeArguments
+            .map((t) => _convertParameterType(t, withNamespace))
+            .map((t) => t.code)
+            .join(', ');
+        return !withNamespace
+            ? new c.CType('${t.name}<$targs>')
+            : namespacedType(namespace, new c.CType('${t.name}<$targs>'));
+      } else {
+        if (t.name == null || t.element.isSynthetic) {
+          //throw new UnimplementedError(
+          //    'The name of this type (${t.runtimeType}) is null or empty; file an issue.');
+          return _dartHandle;
+        }
+
+        if (!withNamespace) return reference(new c.CType(t.name)); //.const$();
+        return reference(namespacedType(namespace, new c.CType(t.name)));
+        //.const$();
+      }
     }
   }
 
@@ -153,7 +213,15 @@ class _Gen {
 
   void walk() {
     // Generate a class Foo {};
-    namespace.body.add(_clazz = new Class(element.name));
+    c.Code root = _clazz = new Class(element.name);
+
+    if (element.type.typeParameters.isNotEmpty) {
+      root = new Template(root)
+        ..arguments.addAll(_tmplArgs = element.type.typeParameters
+            .map((p) => new TemplateArgument.typename(p.name)));
+    }
+
+    namespace.body.add(root);
     _clazz.body.addAll([
       _public = new MemberSection('public'),
       _private = new MemberSection('private')
@@ -162,13 +230,14 @@ class _Gen {
     // static  Dart_HandleHandleError(Dart_Handle handle);
     _private.body
         .add(new c.Code('static Dart_Handle handleError(Dart_Handle handle);'));
-    impl.body.add(new Method(namespace.name, _ctype, 'handleError',
+    impl.body.add(_maybeApplyTemplate(new Method(
+        namespace.name, _ctype, 'handleError',
         returnType: _dartHandle)
       ..parameters.add(new c.Parameter(_dartHandle, 'handle'))
       ..body.addAll([
         new c.Code('if (Dart_IsError(handle)) Dart_PropagateError(handle);'),
         new c.Code('return handle;')
-      ]));
+      ])));
 
     // Foo(const Dart_Handle handle);
     _public.body.add(new c.Code('${_clazz.name}(Dart_Handle handle);'));
@@ -215,8 +284,9 @@ class _Gen {
       Dart_Handle arguments[0];
       return Dart_New(clazz, Dart_NewStringFromCString(""), 0, arguments);
     */
-      var packagePath = p.join(
-          'package:${buildStep.inputId.package}', buildStep.inputId.path);
+      var packagePath = element.library.librarySource.uri
+          .toString()
+          .replaceAll(new RegExp(r'^asset:'), 'package:');
 
       body.addAll([
         new c.Code('Dart_Handle arguments[${constructor.parameters.length}];'),
@@ -229,7 +299,6 @@ class _Gen {
 
       for (int i = 0; i < constructor.parameters.length; i++) {
         var dart = constructor.parameters[i];
-        var cpp = implParams[i];
         var value = new c.Expression('${dart.name}.getHandle()');
 
         if (_isString(dart.type)) {
@@ -241,13 +310,17 @@ class _Gen {
           value = new c.Expression('Dart_NewDouble(${dart.name})');
         } else if (_isBool(dart.type)) {
           value = new c.Expression('Dart_NewBoolean(${dart.name})');
+        } else if (dart.type.isDynamic ||
+            _convertParameterType(dart.type).code == _dartHandle.code) {
+          value = new c.Expression(dart.name);
         }
 
         List<c.Code> b = body;
 
         if (dart.isOptional) {
           var nullptr = _defaultValue(dart.type).code;
-          var cond = new c.Expression('${dart.name} != $nullptr');
+          var cond = new c.Expression(
+              _isBool(dart.type) ? dart.name : '${dart.name} != $nullptr');
           var ifThen = new c.ControlFlow.if$(cond)
             ..body.addAll(
                 [new c.Code('argLen++;'), value.assignTo('arguments[$i]')]);
@@ -277,10 +350,52 @@ class _Gen {
         name = _clazz.name;
       }
 
-      impl.body.add(
+      impl.body.add(_maybeApplyTemplate(
           new Method(namespace.name, _ctype, name, returnType: returnType)
             ..parameters.addAll(implParams)
-            ..body.addAll(body));
+            ..body.addAll(body)));
+    }
+
+    // Finally, methods.
+    for (var method in element.methods) {
+      var headerParams = method.parameters.map(_convertParameter);
+      var implParams =
+          method.parameters.map((p) => _convertParameter(p, true)).toList();
+      var body = <c.Code>[];
+      var requiredCount =
+          method.parameters.where((p) => p.isNotOptional).length;
+
+      int i = 0;
+      var sigParams = headerParams.map((p) {
+        var nullptr = _defaultValue(method.parameters[i++].type).code;
+        var dart = method.parameters.firstWhere((pp) => pp.name == p.name);
+        return dart.isNotOptional
+            ? p
+            : new c.Parameter(p.type, '${p.name} = $nullptr');
+      });
+
+      // Add signature
+      c.CType returnType;
+
+      try {
+        returnType = _convertParameterType(method.returnType);
+      } catch (_) {
+        returnType = _dartHandle;
+      }
+
+      var methodName = method.name;
+      if (method.isOperator) methodName = 'operator${method.name}';
+
+      c.Code sig = new c.FunctionSignature(returnType, methodName)
+        ..parameters.addAll(sigParams);
+
+      if (method.typeParameters.isNotEmpty) {
+        sig = new Template(sig)
+          ..arguments.addAll(method.typeParameters
+              .map((p) => new TemplateArgument.typename(p.name)));
+      }
+
+      _public.body.add(sig);
     }
 
     // Generate getters, setters for fields.
@@ -291,7 +406,7 @@ class _Gen {
           field.type); //reference(new c.CType(field.type.name));
       var namespaced = _convertParameterType(
           field.type, true); //namespacedType(namespace, outType);
-      var setterType = outType, setterNamespaced = namespaced;
+      var setterNamespaced = namespaced;
 
       // Special Dart types require special handling.
       if (_isString(field.type)) {
@@ -304,7 +419,6 @@ class _Gen {
         setterNamespaced = namespaced = outType = new c.CType('bool');
       } else {
         setterNamespaced = namespaced.const$();
-        setterType = outType.const$();
       }
 
       var getterName = 'get' + new ReCase(field.name).pascalCase;
@@ -346,7 +460,7 @@ class _Gen {
             new c.Code('handleError(Dart_DoubleValue(rawHandle, &value));')
           ]);
           retVal = new c.Expression('value');
-        } else if (_isDouble(field.type)) {
+        } else if (_isBool(field.type)) {
           m.body.addAll([
             rawHandle.assignTo('Dart_Handle rawHandle'),
             new c.Code('bool value;'),
@@ -358,7 +472,7 @@ class _Gen {
         // Ultimately, return something..
         m.body.add(retVal.asReturn());
 
-        impl.body.add(m);
+        impl.body.add(_maybeApplyTemplate(m));
       }
 
       if (field.setter != null) {
@@ -382,27 +496,39 @@ class _Gen {
           setVal = new c.Expression('Dart_NewDouble(value)');
         } else if (_isBool(field.type)) {
           setVal = new c.Expression('Dart_NewBoolean(value)');
+        } else if (setterNamespaced.code == 'Dart_Handle') {
+          setVal = new c.Expression('value');
         }
 
-        impl.body.add(m
+        impl.body.add(_maybeApplyTemplate(m
           ..body.add(new c.Code(
-              'Dart_SetField(handle, Dart_NewStringFromCString("${field.name}"), ${setVal.code});')));
+              'Dart_SetField(handle, Dart_NewStringFromCString("${field.name}"), ${setVal.code});'))));
       }
     }
   }
 
   void _genConstructor() {
-    impl.body.add(new Method(namespace.name, _ctype, _clazz.name)
-      ..parameters.add(new c.Parameter(_dartHandle, 'handle'))
-      ..body.add(new c.Code('this->handle = handle;')));
+    impl.body.add(_maybeApplyTemplate(
+        new Method(namespace.name, _ctype, _clazz.name)
+          ..parameters.add(new c.Parameter(_dartHandle, 'handle'))
+          ..body.add(new c.Code('this->handle = handle;'))));
   }
 
   void _genGetHandle() {
     // const Dart_Handle getHandle() const;
     var sig = new c.FunctionSignature(_dartHandle, 'getHandle');
     _public.body.add(new ConstSignature(sig));
-    impl.body.add(new Method(namespace.name, _ctype, 'getHandle',
+    impl.body.add(_maybeApplyTemplate(new Method(
+        namespace.name, _ctype, 'getHandle',
         isConst: true, returnType: _dartHandle)
-      ..body.add(new c.Code('return handle;')));
+      ..body.add(new c.Code('return handle;'))));
+  }
+
+  c.Code _maybeApplyTemplate(Method m) {
+    if (_tmplArgs?.isNotEmpty != true) {
+      return m;
+    } else {
+      return new Template(m)..arguments.addAll(_tmplArgs);
+    }
   }
 }

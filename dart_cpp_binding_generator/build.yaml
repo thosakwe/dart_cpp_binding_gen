@@ -6,9 +6,12 @@ builders:
     import: "package:dart_cpp_binding_generator/dart_cpp_binding_generator.dart"
     builder_factories:
       - cppBindingClassBuilder
+      - extensionBuilder
     auto_apply: root_package
     build_to: source
     build_extensions:
       .dart:
+        - .extension.g.hpp
+        - .extension.g.cpp
         - .g.hpp
         - .g.cpp

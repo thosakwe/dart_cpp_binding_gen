@@ -13,8 +13,8 @@ namespace dart_cpp_binding_generator {
     public:
       User(Dart_Handle handle);
       Dart_Handle getHandle() const;
-      User(const Status& status);
-      const Status& getStatus() const;
+      User(Status& status);
+      Status& getStatus() const;
     private:
       static Dart_Handle handleError(Dart_Handle handle);
       Dart_Handle handle;

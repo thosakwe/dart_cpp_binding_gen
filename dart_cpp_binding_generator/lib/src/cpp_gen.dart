@@ -27,6 +27,42 @@ class Namespace implements Code {
   }
 }
 
+class Template implements Code {
+  final List<TemplateArgument> arguments = [];
+  final Code subject;
+
+  Template(this.subject);
+
+  @override
+  String get code {
+    var b = new CodeBuffer();
+    generate(b);
+    return b.toString();
+  }
+
+  @override
+  void generate(CodeBuffer buffer) {
+    if (arguments.isNotEmpty) {
+      var tmpl = arguments.map((a) => a.code).join(', ');
+      buffer.writeln('template <$tmpl>');
+    }
+    subject.generate(buffer);
+  }
+}
+
+class TemplateArgument implements Code {
+  final String code;
+
+  TemplateArgument(this.code);
+
+  factory TemplateArgument.typename(String name) => new TemplateArgument('typename $name');
+
+  @override
+  void generate(CodeBuffer buffer) {
+    buffer.write(code);
+  }
+}
+
 class Class implements Code {
   final List<Code> body = [];
 
@@ -113,7 +149,7 @@ class Method implements Code {
     }
 
     buffer.write(')');
-    
+
     if (isConst) buffer.write(' const');
     buffer
       ..writeln(' {')

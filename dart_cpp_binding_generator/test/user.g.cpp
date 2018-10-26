@@ -13,7 +13,7 @@ Dart_Handle dart_cpp_binding_generator::User::getHandle() const {
   return handle;
 }
  
-dart_cpp_binding_generator::User::User(const dart_cpp_binding_generator::Status& status) {
+dart_cpp_binding_generator::User::User(dart_cpp_binding_generator::Status& status) {
   Dart_Handle arguments[1];
   int argLen = 1;
   Dart_Handle lib = Dart_LookupLibrary(Dart_NewStringFromCString("package:dart_cpp_binding_generator/test/user.dart"));
@@ -22,7 +22,7 @@ dart_cpp_binding_generator::User::User(const dart_cpp_binding_generator::Status&
   this->handle = Dart_New(clazz, Dart_NewStringFromCString(""), argLen, arguments);
 }
  
-const dart_cpp_binding_generator::Status& dart_cpp_binding_generator::User::getStatus() const {
+dart_cpp_binding_generator::Status& dart_cpp_binding_generator::User::getStatus() const {
   return Dart_GetField(handle, Dart_NewStringFromCString("status"));
 }
  
