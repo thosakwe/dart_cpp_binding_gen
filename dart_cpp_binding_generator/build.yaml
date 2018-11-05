@@ -2,8 +2,8 @@ targets:
   $default: {}
 builders:
   cpp_binding:
-    target: "dart_cpp_binding_generator"
-    import: "package:dart_cpp_binding_generator/dart_cpp_binding_generator.dart"
+    target: "cpp_binding_generator"
+    import: "package:cpp_binding_generator/cpp_binding_generator.dart"
     builder_factories:
       - cppBindingClassBuilder
       - extensionBuilder

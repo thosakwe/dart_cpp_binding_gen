@@ -4,7 +4,7 @@ import 'package:analyzer/dart/ast/ast.dart';
 import 'package:build/build.dart';
 import 'package:c_builder/c_builder.dart' as c;
 import 'package:code_buffer/code_buffer.dart';
-import 'package:dart_cpp_binding_annotation/dart_cpp_binding_annotation.dart';
+import 'package:cpp_binding/cpp_binding.dart';
 import 'package:path/path.dart' as p;
 import 'package:recase/recase.dart';
 import 'package:source_gen/source_gen.dart';

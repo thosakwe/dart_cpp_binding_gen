@@ -2,7 +2,7 @@
 library delegate_test;
 
 import 'dart-ext:delegate_test';
-import 'package:dart_cpp_binding_annotation/dart_cpp_binding_annotation.dart';
+import 'package:cpp_binding/cpp_binding.dart';
 import 'package:test/test.dart';
 import 'foo.dart';
 

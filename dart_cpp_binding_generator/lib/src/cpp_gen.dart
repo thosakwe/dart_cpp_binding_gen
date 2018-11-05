@@ -44,7 +44,7 @@ class Template implements Code {
   void generate(CodeBuffer buffer) {
     if (arguments.isNotEmpty) {
       var tmpl = arguments.map((a) => a.code).join(', ');
-      buffer.writeln('template <$tmpl>');
+      buffer.writeln('template < $tmpl >');
     }
     subject.generate(buffer);
   }
@@ -120,8 +120,8 @@ CType namespacedType(Namespace namespace, CType other) =>
 
 class Method implements Code {
   final String namespace;
-  final CType clazz;
-  final String name;
+  CType clazz;
+  String name;
   final bool isConst;
   final List<Parameter> parameters = [];
   final List<Code> body = [];

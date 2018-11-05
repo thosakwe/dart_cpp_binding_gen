@@ -1,4 +1,4 @@
-import 'package:dart_cpp_binding_annotation/dart_cpp_binding_annotation.dart';
+import 'package:cpp_binding/cpp_binding.dart';
 
 @binding
 class Chat {

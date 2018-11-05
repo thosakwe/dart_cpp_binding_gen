@@ -14,6 +14,4 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ferror-limit=500 -undefined dynamic_loo
 include_directories("${DART_SDK}/include")
 add_definitions(-DDART_SHARED_LIB=1)
 
-add_subdirectory(vendor/cppast)
-add_subdirectory(src)
 add_subdirectory(test)
