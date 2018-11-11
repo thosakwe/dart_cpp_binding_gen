@@ -55,7 +55,8 @@ class TemplateArgument implements Code {
 
   TemplateArgument(this.code);
 
-  factory TemplateArgument.typename(String name) => new TemplateArgument('typename $name');
+  factory TemplateArgument.typename(String name) =>
+      new TemplateArgument('typename $name');
 
   @override
   void generate(CodeBuffer buffer) {

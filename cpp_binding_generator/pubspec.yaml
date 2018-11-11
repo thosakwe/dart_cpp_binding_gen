@@ -1,10 +1,18 @@
 name: cpp_binding_generator
+version: 0.0.0
+description: Builder for generating C++ classes and extension entrypoint for Dart.
+author: Tobe O <thosakwe@gmail.com>
+homepage: https://github.com/thosakwe/dart_cpp_binding_gen
+environment:
+  sdk: ">=2.0.0-dev <3.0.0"
 dependencies:
+  analyzer:
   build: ">=0.12.0 <2.0.0"
   build_config: ^0.3.0
   c_builder: ^1.0.0
-  cpp_binding:
-    path: ../cpp_binding
+  code_buffer: ^1.0.0
+  cpp_binding: ^0.0.0
+  path: ^1.0.0
   recase: ^2.0.0
   source_gen: ^0.9.0
 dev_dependencies:

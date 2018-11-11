@@ -1,4 +1,7 @@
 name: cpp_binding
+description: Annotations for generating C++ classes and extension entrypoint for Dart.
+author: Tobe O <thosakwe@gmail.com>
+homepage: https://github.com/thosakwe/dart_cpp_binding_gen
 version: 0.0.0
 environment:
   sdk: ">=2.0.0-dev <3.0.0"
