@@ -227,6 +227,19 @@ class _Gen {
     }
   }
 
+  static const ignoredClasses = const [
+    const TypeChecker.fromRuntime(List),
+    const TypeChecker.fromRuntime(Iterable),
+    const TypeChecker.fromRuntime(Iterator),
+    const TypeChecker.fromRuntime(Invocation),
+    const TypeChecker.fromRuntime(Map),
+    const TypeChecker.fromRuntime(MapEntry),
+    const TypeChecker.fromRuntime(Set),
+    const TypeChecker.fromRuntime(Stream),
+    const TypeChecker.fromRuntime(Future),
+    const TypeChecker.fromRuntime(StreamSubscription),
+  ];
+
   c.CType _convertParameterType(DartType t, [bool withNamespace = false]) {
     if (t.name == 'void' || t.isVoid) {
       return c.CType.void$;
@@ -240,6 +253,8 @@ class _Gen {
       return new c.CType('bool');
     else if (t is TypeParameterType) {
       return new c.CType(t.name);
+    } else if (ignoredClasses.any((tt) => tt.isAssignableFromType(t))) {
+      return _dartHandle;
     } else {
       // Bind the type, if it hasn't been bound yet.
       var tc = new TypeChecker.fromStatic(t);

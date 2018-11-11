@@ -134,8 +134,8 @@ return Dart_Null();
 
     var helperFile = new c.CompilationUnit();
     helperFile.body.addAll([
-      new c.Include.quotes(
-          p.setExtension(p.basename(buildStep.inputId.uri.path), '.h')),
+      new c.Include.quotes(p.setExtension(
+          p.basename(buildStep.inputId.uri.path), '.extension.g.hpp')),
       resolveName,
       initFn
     ]);
